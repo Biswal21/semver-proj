@@ -1,5 +1,6 @@
+#!/usr/bin/env bash
 
- 'Monotools: semver-yeasy'
+echo 'PROJECT: Project-bipiti-bopity-boop'
 
 mode=$1
 
