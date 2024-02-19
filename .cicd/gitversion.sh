@@ -44,14 +44,18 @@ changed)
     if [ "$(echo "${DIFF_DEST}" | grep -o '^hotfix/')" = "hotfix/" ]; then
         DIFF_SOURCE=${PROD_BRANCH}
     fi
-    echo "::set-output name=diff_source::$DIFF_SOURCE"
-    echo "::set-output name=diff_dest::$DIFF_DEST"
+    # echo "::set-output name=diff_source::$DIFF_SOURCE"
+    echo "diff_source=${DIFF_SOURCE}" >>$GITHUB_OUTPUT
+    # echo "::set-output name=diff_dest::$DIFF_DEST"
+    echo "diff_dest=${DIFF_DEST}" >>$GITHUB_OUTPUT
     echo "DIFF_SOURCE='$DIFF_SOURCE'"
     echo "DIFF_DEST='$DIFF_DEST'"
 
     # setting empty outputs otherwise next steps fail during preprocessing stage
-    echo "::set-output name=changed::''"
-    echo "::set-output name=changed_services::''"
+    # echo "::set-output name=changed::''"
+    echo "changed=" >>$GITHUB_OUTPUT
+    # echo "::set-output name=changed_services::''"
+    echo "changed_servcies=" >>$GITHUB_OUTPUT
 
     # service change calculation with diff - ideally use something like 'plz' or 'bazel'
     if [ "${GITVERSION_REPO_TYPE}" = 'SINGLE_APP' ]; then
@@ -61,7 +65,8 @@ changed)
         changed=false
         fi
         echo "changed='${changed}'"
-        echo "::set-output name=changed::$changed"
+        # echo "::set-output name=changed::$changed"
+        echo "changed=${changed}" >> $GITHUB_OUTPUT
     else
         if [ "$(git diff "${DIFF_SOURCE}" "${DIFF_DEST}" --name-only | grep -o '^common/' > /dev/null && echo 'common changed')" = 'common changed' ]; then
         changed_services=`ls -1 apps | xargs -n 1 printf 'apps/%s\n'`
@@ -69,7 +74,8 @@ changed)
         changed_services=`git diff "${DIFF_SOURCE}" "${DIFF_DEST}" --name-only | grep -o '^apps/[a-zA-Z-]*' | sort | uniq`
         fi
         changed_services=$(printf '%s' "$changed_services" | jq --raw-input --slurp '.')
-        echo "::set-output name=changed_services::$changed_services"
+        # echo "::set-output name=changed_services::$changed_services"
+        echo "changed_services=${changed_services}" >> $GITHUB_OUTPUT
         echo "changed_services='$(echo "$changed_services" | sed 'N;s/\n/, /g')'"
     fi
 ;;
@@ -112,12 +118,15 @@ calculate-version)
     PR_BODY="${service_versions_txt}"
     PR_BODY=$(printf '%s' "$PR_BODY" | jq --raw-input --slurp '.')
     echo "${PR_BODY}"
-    echo "::set-output name=PR_BODY::$PR_BODY"
+    # echo "::set-output name=PR_BODY::$PR_BODY"
+    echo "PR_BODY::${PR_BODY}" >> $GITHUB_OUTPUT
 ;;
 
 update-pr)
     PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
     # from https://github.com/actions/checkout/issues/58#issuecomment-614041550
+    echo "PR_NUMBER='$PR_NUMBER'"
+    echo "SEMVERY_YEASY_PR_BODY='$SEMVERY_YEASY_PR_BODY'"
     jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\" }" | \
     curl -sL  -X PATCH -d @- \
         -H "Content-Type: application/json" \
