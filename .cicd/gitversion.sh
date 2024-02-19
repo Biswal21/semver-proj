@@ -117,7 +117,8 @@ calculate-version)
     fi
     # fix multiline variables
     # from: https://github.com/actions/create-release/issues/64#issuecomment-638695206
-    PR_BODY="${service_versions_txt}"
+    PR_BODY=$service_versions_txt
+    echo "Before jq command ${PR_BODY}"
     PR_BODY=$(printf '%s' "$PR_BODY" | jq --raw-input --slurp '.')
     echo "${PR_BODY}"
     # echo "::set-output name=PR_BODY::$PR_BODY"
