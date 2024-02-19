@@ -148,6 +148,13 @@ update-pr)
     else
         echo "SEMVERY_YEASY_PR_BODY does not exist in current_body"
     fi
+
+    if grep -Fq "$SEMVERY_YEASY_PR_BODY" <<< "$current_body"; then
+        echo "SEMVERY_YEASY_PR_BODY exists in current_body"
+    else
+        echo "SEMVERY_YEASY_PR_BODY does not exist in current_body"
+    fi
+
     
     jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\n${current_pr_body}\" }" | \
     curl -sL  -X PATCH -d @- \
