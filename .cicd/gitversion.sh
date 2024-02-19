@@ -132,16 +132,16 @@ update-pr)
     PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
     # from https://github.com/actions/checkout/issues/58#issuecomment-614041550
     echo "PR_NUMBER='$PR_NUMBER'"
-    echo "SEMVERY_YEASY_PR_BODY=${SEMVERY_YEASY_PR_BODY}"
 
     pr_response=$(curl -sL \
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
-    echo "pr_response=${pr_response}"
     current_pr_body=$(echo $pr_response | jq -r '.body' | sed 'N;s/\n/\\n/g')
 
-    echo "batao new body=${SEMVERY_YEASY_PR_BODY}\n${current_pr_body}"
+    echo "current_pr_body=${current_pr_body}"
+    echo "SEMVERY_YEASY_PR_BODY=${SEMVERY_YEASY_PR_BODY}"
+    
     jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\n${current_pr_body}\" }" | \
     curl -sL  -X PATCH -d @- \
         -H "Content-Type: application/vnd.github+json" \
