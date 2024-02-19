@@ -14,8 +14,8 @@ on:
 
 env:
   GITVERSION: 'gittools/gitversion:5.10.0-alpine.3.14-6.0'
-  # PROD_BRANCH: "main"
-  # TEST_BRANCH: "dev"
+  PROD_BRANCH: "main"
+  TEST_BRANCH: "dev"
   MAIN_BRANCHES: ("dev" "main")
   GITVERSION_TAG_PROPERTY_PULL_REQUESTS: .SemVer
   GITVERSION_TAG_PROPERTY_DEFAULT: .SemVer
@@ -38,8 +38,8 @@ jobs:
     - name: Fetch all history for all tags and branches
       run: |
         git fetch --unshallow
-        git checkout $PROD_BRANCH && git checkout -
-        git checkout $TEST_BRANCH && git checkout -
+        git checkout main && git checkout -
+        git checkout dev && git checkout -
 
     - name: Checkout to branch
       run: . ./.cicd/gitversion.sh checkout
