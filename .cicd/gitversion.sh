@@ -126,7 +126,7 @@ calculate-version)
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
     echo "pr_response=${pr_response}"
-    current_pr_body=$(echo $pr_response | jq -r '.body' | sed 's/\\n/\n/g')
+    current_pr_body=$(echo $pr_response | jq -r '.body' | sed 'N;s/\n/\\n/g')
     echo "current_pr_body=$current_pr_body"
     PR_BODY="'$service_versions_txt'\n'$current_pr_body'"
     PR_BODY=$(echo "$PR_BODY" | sed 'N;s/\n/\\n/g')
