@@ -129,11 +129,13 @@ calculate-version)
     current_pr_body=$(echo $pr_response | jq -r '.body' | sed 'N;s/\n/\\n/g')
     echo "current_pr_body=$current_pr_body"
     PR_BODY="$service_versions_txt\n$current_pr_body"
+    echo "before sed PR_BODY=${PR_BODY}"
     PR_BODY=$(echo "$PR_BODY" | sed 'N;s/\n/\\n/g')
+    echo "after sed PR_BODY=${PR_BODY}"
     # PR_BODY=$(printf '%s' "$PR_BODY" | jq --raw-input --slurp '.')
-    echo "PR_BODY='$PR_BODY'"
+    echo "PR_BODY=${PR_BODY}"
     # echo "::set-output name=PR_BODY::$PR_BODY"
-    echo "PR_BODY='$PR_BODY'" >> $GITHUB_OUTPUT
+    echo "PR_BODY=${PR_BODY}" >> $GITHUB_OUTPUT
 ;;
 
 update-pr)
