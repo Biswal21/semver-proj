@@ -130,7 +130,7 @@ update-pr)
     # from https://github.com/actions/checkout/issues/58#issuecomment-614041550
     echo "PR_NUMBER='$PR_NUMBER'"
     echo "SEMVERY_YEASY_PR_BODY=${SEMVERY_YEASY_PR_BODY}"
-    jq -nc "{\"body\": ${SEMVERY_YEASY_PR_BODY} }" | \
+    jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\" }" | \
     curl -sL  -X PATCH -d @- \
         -H "Content-Type: application/json" \
         -H "Authorization: token ${GITHUB_TOKEN}" \
