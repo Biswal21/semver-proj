@@ -7,13 +7,15 @@ on:
     - main
   push:
     branches:
-    - develop
+    - dev
     - main
-    - 'release/**'
-    - 'hotfix/**'
+    # - 'release/**'
+    # - 'hotfix/**'
 
 env:
   GITVERSION: 'gittools/gitversion:5.10.0-alpine.3.14-6.0'
+  PROD_BRANCH: "main"
+  TEST_BRANCH: "dev"
   MAIN_BRANCHES: ("dev" "main")
   GITVERSION_TAG_PROPERTY_PULL_REQUESTS: .SemVer
   GITVERSION_TAG_PROPERTY_DEFAULT: .SemVer
@@ -36,8 +38,8 @@ jobs:
     - name: Fetch all history for all tags and branches
       run: |
         git fetch --unshallow
-        git checkout main && git checkout -
-        git checkout develop && git checkout -
+        git checkout env.PROD_BRANCH && git checkout -
+        git checkout env.TEST_BRANCH && git checkout -
 
     - name: Checkout to branch
       run: . ./.cicd/gitversion.sh checkout
@@ -61,11 +63,11 @@ jobs:
       run: . ./.cicd/gitversion.sh update-pr
 
 
-    - name: Tag build
-      if: ${{ github.event_name == 'push' && (startsWith(steps.calculate_changed_services.outputs.diff_dest, 'release') || startsWith(steps.calculate_changed_services.outputs.diff_dest, 'hotfix') || contains(env.MAIN_BRANCHES, steps.calculate_changed_services.outputs.diff_dest)) }}
-      env:
-        DIFF_DEST: ${{ steps.calculate_changed_services.outputs.DIFF_DEST }}
-        SEMVERYEASY_CHANGED: ${{ steps.calculate_changed_services.outputs.changed }}
-        SEMVERYEASY_CHANGED_SERVICES: ${{ fromJSON(steps.calculate_changed_services.outputs.changed_services) }}
-      run: . ./.cicd/gitversion.sh tag
+    # - name: Tag build
+    #   if: ${{ github.event_name == 'push' && (startsWith(steps.calculate_changed_services.outputs.diff_dest, 'release') || startsWith(steps.calculate_changed_services.outputs.diff_dest, 'hotfix') || contains(env.MAIN_BRANCHES, steps.calculate_changed_services.outputs.diff_dest)) }}
+    #   env:
+    #     DIFF_DEST: ${{ steps.calculate_changed_services.outputs.DIFF_DEST }}
+    #     SEMVERYEASY_CHANGED: ${{ steps.calculate_changed_services.outputs.changed }}
+    #     SEMVERYEASY_CHANGED_SERVICES: ${{ fromJSON(steps.calculate_changed_services.outputs.changed_services) }}
+    #   run: . ./.cicd/gitversion.sh tag
 
