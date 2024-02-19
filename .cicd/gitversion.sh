@@ -128,8 +128,10 @@ calculate-version)
     echo "pr_response=${pr_response}"
     current_pr_body=$(echo $pr_response | jq -r '.body')
     echo "current_pr_body=${current_pr_body}"
-    PR_BODY="${service_versions_txt}\n${current_pr_body}"
+    # PR_BODY="'$service_versions_txt'\n'$current_pr_body'"
+    PR_BODY="$service_versions_txt"$'\n'"$current_pr_body"
     echo "PR_BODY='$PR_BODY'"
+
     # PR_BODY=$(printf '%s' "$PR_BODY" | jq --raw-input --slurp '.')
     # echo "${PR_BODY}"
     # echo "::set-output name=PR_BODY::$PR_BODY"
@@ -140,7 +142,7 @@ update-pr)
     PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
     # from https://github.com/actions/checkout/issues/58#issuecomment-614041550
     echo "PR_NUMBER='$PR_NUMBER'"
-    echo "SEMVERY_YEASY_PR_BODY=${SEMVERY_YEASY_PR_BODY}"
+    echo "SEMVERY_YEASY_PR_BODY='$SEMVERY_YEASY_PR_BODY'"
     jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\" }" | \
     curl -sL  -X PATCH -d @- \
         -H "Content-Type: application/vnd.github+json" \
