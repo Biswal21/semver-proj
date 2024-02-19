@@ -117,8 +117,14 @@ calculate-version)
     fi
     # fix multiline variables
     # from: https://github.com/actions/create-release/issues/64#issuecomment-638695206
-    PR_BODY=$service_versions_txt
-    echo "Before jq command ${PR_BODY}"
+    PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+    pr_response=curl -sL \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"
+    
+    current_pr_body=$(echo $pr_response | jq -r '.body')
+    PR_BODY="${service_versions_txt}\n${current_pr_body}"
     # PR_BODY=$(printf '%s' "$PR_BODY" | jq --raw-input --slurp '.')
     echo "${PR_BODY}"
     # echo "::set-output name=PR_BODY::$PR_BODY"
@@ -132,7 +138,7 @@ update-pr)
     echo "SEMVERY_YEASY_PR_BODY=${SEMVERY_YEASY_PR_BODY}"
     jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\" }" | \
     curl -sL  -X PATCH -d @- \
-        -H "Content-Type: application/json" \
+        -H "Content-Type: application/vnd.github+json" \
         -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"
 ;;
