@@ -85,8 +85,9 @@ changed)
 calculate-version)
     CONFIG_FILE_VAR="GITVERSION_CONFIG_${GITVERSION_REPO_TYPE}"
     if [ "${GITVERSION_REPO_TYPE}" = 'SINGLE_APP' ]; then
-        service_versions_txt='## Version update\n'
+        service_versions_txt=''
         if [ "${SEMVERYEASY_CHANGED}" = 'true' ]; then
+        service_versions_txt='## Version update\n'
         docker run --rm -v "$(pwd):/repo" ${GITVERSION} /repo /config "${CONFIG_FILE}"
         gitversion_calc=$(docker run --rm -v "$(pwd):/repo" ${GITVERSION} /repo /config "${CONFIG_FILE}")
         GITVERSION_TAG_PROPERTY_NAME="GITVERSION_TAG_PROPERTY_PULL_REQUESTS"
@@ -140,7 +141,7 @@ update-pr)
     echo "pr_response=${pr_response}"
     current_pr_body=$(echo $pr_response | jq -r '.body' | sed 'N;s/\n/\\n/g')
 
-
+    echo "batao new body=${SEMVERY_YEASY_PR_BODY}\n${current_pr_body}"
     jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\n${current_pr_body}\" }" | \
     curl -sL  -X PATCH -d @- \
         -H "Content-Type: application/vnd.github+json" \
