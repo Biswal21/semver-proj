@@ -127,10 +127,10 @@ calculate-version)
         "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
     echo "pr_response=${pr_response}"
     current_pr_body=$(echo $pr_response | jq -r '.body')
-    echo "current_pr_body=${current_pr_body}"
+    echo "current_pr_body='$current_pr_body'"
     # PR_BODY="'$service_versions_txt'\n'$current_pr_body'"
     PR_BODY="$service_versions_txt"$'\n'"$current_pr_body"
-
+    echo "PR_BODY='$PR_BODY'"
     # PR_BODY=$(printf '%s' "$PR_BODY" | jq --raw-input --slurp '.')
     # echo "${PR_BODY}"
     # echo "::set-output name=PR_BODY::$PR_BODY"
