@@ -122,7 +122,7 @@ calculate-version)
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"
-    
+    echo "pr_response=${pr_response}"
     current_pr_body=$(echo $pr_response | jq -r '.body')
     echo "current_pr_body=${current_pr_body}"
     PR_BODY="${service_versions_txt}\n${current_pr_body}"
