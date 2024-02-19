@@ -94,15 +94,15 @@ calculate-version)
         service_version=$(echo "${gitversion_calc}" | jq -r "[${GITVERSION_TAG_PROPERTY}] | join(\"\")")
         service_versions_txt+="v${service_version}\n"
         else
-        service_versions_txt+='\nNo version update required\n'
+        service_versions_txt+='No version update required\n'
         fi
     else
-        service_versions_txt='## impact surface\n'
+        service_versions_txt='## Impact surface\n'
         changed_services=( $SEMVERYEASY_CHANGED_SERVICES )
         if [ "${#changed_services[@]}" = "0" ]; then
         service_versions_txt+='No services changed\n'
         else
-        service_versions_txt="## impact surface\n"
+        service_versions_txt="## Impact surface\n"
         for svc in "${changed_services[@]}"; do
             echo "calculation for ${svc}"
             CONFIG_FILE=${!CONFIG_FILE_VAR//\$svc/$svc}
@@ -129,13 +129,13 @@ calculate-version)
     current_pr_body=$(echo $pr_response | jq -r '.body' | sed 'N;s/\n/\\n/g')
     echo "current_pr_body=$current_pr_body"
     PR_BODY="$service_versions_txt\n$current_pr_body"
-    echo "before sed PR_BODY=${PR_BODY}"
+    echo "before sed PR_BODY='$PR_BODY'"
     PR_BODY=$(echo "$PR_BODY" | sed 'N;s/\n/\\n/g')
-    echo "after sed PR_BODY=${PR_BODY}"
+    echo "after sed PR_BODY='$PR_BODY'"
     # PR_BODY=$(printf '%s' "$PR_BODY" | jq --raw-input --slurp '.')
-    echo "PR_BODY=${PR_BODY}"
+    echo "PR_BODY='$PR_BODY'"
     # echo "::set-output name=PR_BODY::$PR_BODY"
-    echo "PR_BODY=${PR_BODY}" >> $GITHUB_OUTPUT
+    echo "PR_BODY='$PR_BODY'" >> $GITHUB_OUTPUT
 ;;
 
 update-pr)
