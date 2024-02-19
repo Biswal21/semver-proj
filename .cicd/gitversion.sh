@@ -85,7 +85,7 @@ changed)
 calculate-version)
     CONFIG_FILE_VAR="GITVERSION_CONFIG_${GITVERSION_REPO_TYPE}"
     if [ "${GITVERSION_REPO_TYPE}" = 'SINGLE_APP' ]; then
-        service_versions_txt='## version bump\n'
+        service_versions_txt='## Version update\n'
         if [ "${SEMVERYEASY_CHANGED}" = 'true' ]; then
         docker run --rm -v "$(pwd):/repo" ${GITVERSION} /repo /config "${CONFIG_FILE}"
         gitversion_calc=$(docker run --rm -v "$(pwd):/repo" ${GITVERSION} /repo /config "${CONFIG_FILE}")
@@ -94,7 +94,7 @@ calculate-version)
         service_version=$(echo "${gitversion_calc}" | jq -r "[${GITVERSION_TAG_PROPERTY}] | join(\"\")")
         service_versions_txt+="v${service_version}\n"
         else
-        service_versions_txt+='\nNo version bump required\n'
+        service_versions_txt+='\nNo version update required\n'
         fi
     else
         service_versions_txt='## impact surface\n'
