@@ -130,12 +130,15 @@ calculate-version)
     echo "current_pr_body=${current_pr_body}"
     # PR_BODY="'$service_versions_txt'\n'$current_pr_body'"
     PR_BODY="$service_versions_txt"$'\n'"$current_pr_body"
-    echo "PR_BODY='$PR_BODY'"
 
     # PR_BODY=$(printf '%s' "$PR_BODY" | jq --raw-input --slurp '.')
     # echo "${PR_BODY}"
     # echo "::set-output name=PR_BODY::$PR_BODY"
-    echo "PR_BODY='$PR_BODY'" >> $GITHUB_OUTPUT
+    echo "PR_BODY='$(
+        cat <<EOF
+$PR_BODY
+EOF
+)'" >> $GITHUB_OUTPUT
 ;;
 
 update-pr)
