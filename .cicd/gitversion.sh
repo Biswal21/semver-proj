@@ -59,7 +59,9 @@ changed)
 
     # service change calculation with diff - ideally use something like 'plz' or 'bazel'
     if [ "${GITVERSION_REPO_TYPE}" = 'SINGLE_APP' ]; then
-        if [ `git diff "${DIFF_SOURCE}" "${DIFF_DEST}" --name-only | grep -o '^src/' | sort | uniq` = 'src/' ]; then
+        # if [ `git diff "${DIFF_SOURCE}" "${DIFF_DEST}" --name-only | grep -o '^src/' | sort | uniq` = 'src/' ]; then
+        # ! Modify the grep to match the correct folder which one you should not track for version bump
+        if [ "$(git diff "${DIFF_SOURCE}" "${DIFF_DEST}" --name-only | grep -E -v '^(.github/|.vscode/|.husky|.cicd/)' | sort | uniq)" ]; then
         changed=true
         else
         changed=false
