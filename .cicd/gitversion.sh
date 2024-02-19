@@ -1,5 +1,6 @@
+#!/usr/bin/env bash
 
- 'Monotools: semver-yeasy'
+echo 'PROJECT: Project-bipiti-bopity-boop'
 
 mode=$1
 
@@ -13,6 +14,8 @@ GITVERSION_TAG_PROPERTY_MAIN='.MajorMinorPatch'
 GITVERSION_REPO_TYPE='SINGLE_APP'
 GITVERSION_CONFIG_SINGLE_APP='/repo/.cicd/common/.gitversion.yml'
 GITVERSION_CONFIG_MONOREPO='/repo/apps/${svc}/.gitversion.yml'
+PROD_BRANCH="main"
+TEST_BRANCH="dev"
 
 case "${mode}" in
 
@@ -35,11 +38,11 @@ changed)
     fi
     # use main as source if current branch is a release branch
     if [ "$(echo "${DIFF_DEST}" | grep -o '^release/')" = "release/" ]; then
-        DIFF_SOURCE="main"
+        DIFF_SOURCE=${PROD_BRANCH}
     fi
     # use main as source if current branch is a hotfix branch
     if [ "$(echo "${DIFF_DEST}" | grep -o '^hotfix/')" = "hotfix/" ]; then
-        DIFF_SOURCE="main"
+        DIFF_SOURCE=${PROD_BRANCH}
     fi
     echo "::set-output name=diff_source::$DIFF_SOURCE"
     echo "::set-output name=diff_dest::$DIFF_DEST"
