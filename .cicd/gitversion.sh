@@ -117,24 +117,13 @@ calculate-version)
     fi
     # fix multiline variables
     # from: https://github.com/actions/create-release/issues/64#issuecomment-638695206
-    PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
-    echo "PR_NUMBER='$PR_NUMBER'"
-    echo "GITHUB_REPOSITORY='$GITHUB_REPOSITORY'"
-    echo "GITHUB_TOKEN='$GITHUB_TOKEN'"
-    pr_response=$(curl -sL \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-        "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
-    echo "pr_response=${pr_response}"
-    current_pr_body=$(echo $pr_response | jq -r '.body' | sed 'N;s/\n/\\n/g')
-    echo "current_pr_body=$current_pr_body"
-    PR_BODY="$service_versions_txt\n$current_pr_body"
-    echo "before sed PR_BODY='$PR_BODY'"
-    PR_BODY=$(echo "$PR_BODY" | sed 'N;s/\n/\\n/g')
-    echo "after sed PR_BODY='$PR_BODY'"
-    # PR_BODY=$(printf '%s' "$PR_BODY" | jq --raw-input --slurp '.')
+    # PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+    # echo "PR_NUMBER='$PR_NUMBER'"
+    # echo "GITHUB_REPOSITORY='$GITHUB_REPOSITORY'"
+    # echo "GITHUB_TOKEN='$GITHUB_TOKEN'"
+    
+    PR_BODY=$service_versions_txt
     echo "PR_BODY='$PR_BODY'"
-    # echo "::set-output name=PR_BODY::$PR_BODY"
     echo "PR_BODY='$PR_BODY'" >> $GITHUB_OUTPUT
 ;;
 
@@ -143,7 +132,16 @@ update-pr)
     # from https://github.com/actions/checkout/issues/58#issuecomment-614041550
     echo "PR_NUMBER='$PR_NUMBER'"
     echo "SEMVERY_YEASY_PR_BODY=${SEMVERY_YEASY_PR_BODY}"
-    jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\" }" | \
+
+    pr_response=$(curl -sL \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
+    echo "pr_response=${pr_response}"
+    current_pr_body=$(echo $pr_response | jq -r '.body' | sed 'N;s/\n/\\n/g')
+
+
+    jq -nc "{\"body\": \"${current_pr_body}\n${SEMVERY_YEASY_PR_BODY}\" }" | \
     curl -sL  -X PATCH -d @- \
         -H "Content-Type: application/vnd.github+json" \
         -H "Authorization: token ${GITHUB_TOKEN}" \
