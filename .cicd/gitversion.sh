@@ -123,8 +123,8 @@ calculate-version)
     # echo "GITHUB_TOKEN='$GITHUB_TOKEN'"
     
     PR_BODY=$service_versions_txt
-    echo "PR_BODY='$PR_BODY'"
-    echo "PR_BODY='$PR_BODY'" >> $GITHUB_OUTPUT
+    echo "PR_BODY=${PR_BODY}"
+    echo "PR_BODY=${PR_BODY}" >> $GITHUB_OUTPUT
 ;;
 
 update-pr)
@@ -141,7 +141,7 @@ update-pr)
     current_pr_body=$(echo $pr_response | jq -r '.body' | sed 'N;s/\n/\\n/g')
 
 
-    jq -nc "{\"body\": \"${current_pr_body}\n${SEMVERY_YEASY_PR_BODY}\" }" | \
+    jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\n${current_pr_body}\" }" | \
     curl -sL  -X PATCH -d @- \
         -H "Content-Type: application/vnd.github+json" \
         -H "Authorization: token ${GITHUB_TOKEN}" \
