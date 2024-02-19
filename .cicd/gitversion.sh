@@ -118,6 +118,9 @@ calculate-version)
     # fix multiline variables
     # from: https://github.com/actions/create-release/issues/64#issuecomment-638695206
     PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+    echo "PR_NUMBER='$PR_NUMBER'"
+    echo "GITHUB_REPOSITORY='$GITHUB_REPOSITORY'"
+    echo "GITHUB_TOKEN='$GITHUB_TOKEN'"
     pr_response= curl -sL \
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
