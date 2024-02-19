@@ -59,7 +59,9 @@ changed)
 
     # service change calculation with diff - ideally use something like 'plz' or 'bazel'
     if [ "${GITVERSION_REPO_TYPE}" = 'SINGLE_APP' ]; then
-        if [ `git diff "${DIFF_SOURCE}" "${DIFF_DEST}" --name-only | grep -o '^src/' | sort | uniq` = 'src/' ]; then
+        # if [ `git diff "${DIFF_SOURCE}" "${DIFF_DEST}" --name-only | grep -o '^src/' | sort | uniq` = 'src/' ]; then
+        # ! Modify the grep to match the correct folder which one you should not track for version bump
+        if [ "$(git diff "${DIFF_SOURCE}" "${DIFF_DEST}" --name-only | grep -E -v '^(.github/|.vscode/|.husky|.cicd/)' | sort | uniq)" ]; then
         changed=true
         else
         changed=false
@@ -115,18 +117,19 @@ calculate-version)
     fi
     # fix multiline variables
     # from: https://github.com/actions/create-release/issues/64#issuecomment-638695206
-    PR_BODY="${service_versions_txt}"
-    PR_BODY=$(printf '%s' "$PR_BODY" | jq --raw-input --slurp '.')
+    PR_BODY=$service_versions_txt
+    echo "Before jq command ${PR_BODY}"
+    # PR_BODY=$(printf '%s' "$PR_BODY" | jq --raw-input --slurp '.')
     echo "${PR_BODY}"
     # echo "::set-output name=PR_BODY::$PR_BODY"
-    echo "PR_BODY::${PR_BODY}" >> $GITHUB_OUTPUT
+    echo "PR_BODY=${PR_BODY}" >> $GITHUB_OUTPUT
 ;;
 
 update-pr)
     PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
     # from https://github.com/actions/checkout/issues/58#issuecomment-614041550
     echo "PR_NUMBER='$PR_NUMBER'"
-    echo "SEMVERY_YEASY_PR_BODY='$SEMVERY_YEASY_PR_BODY'"
+    echo "SEMVERY_YEASY_PR_BODY=${SEMVERY_YEASY_PR_BODY}"
     jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\" }" | \
     curl -sL  -X PATCH -d @- \
         -H "Content-Type: application/json" \
