@@ -130,29 +130,30 @@ calculate-version)
 ;;
 
 update-pr)
-    PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
-    # from https://github.com/actions/checkout/issues/58#issuecomment-614041550
+    PR_NUMBER=$(echo "$GITHUB_REF" | awk 'BEGIN { FS = "/" } ; { print $3 }')
     echo "PR_NUMBER='$PR_NUMBER'"
 
     pr_response=$(curl -sL \
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
-    current_pr_body=$(echo $pr_response | jq '.body')
-    # echo "current_pr_body='$current_pr_body'"
-    formatted_body=$(echo $current_pr_body | sed -e 'N;s/\n/\\n/g' -e 's/\\r\\n/\\n/g')
+    current_pr_body=$(echo "$pr_response" | jq '.body')
+    formatted_body=$(echo "$current_pr_body" | sed -e 'N;s/\n/\\n/g' -e 's/\\r\\n/\\n/g')
     formatted_body="${formatted_body#\"}"  # Remove double quote from the beginning
     formatted_body="${formatted_body%\"}"  # Remove double quote from the end
-    echo "formatted_body='$formatted_body'"
-    tt=$(echo $SEMVERY_YEASY_PR_BODY | sed -e 'N;s/\n/\\n/g' -e 's/\\r\\n/\\n/g')
-    echo "SEMVERY_YEASY_PR_BODY='$tt'"
-    if [[ $formatted_body == *"$tt"* ]]; then echo 'Match found'; else echo 'Match not found'; fi
 
-    jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}${formatted_body}\" }" | \
-    curl -sL  -X PATCH -d @- \
-        -H "Content-Type: application/vnd.github+json" \
-        -H "Authorization: token ${GITHUB_TOKEN}" \
-        "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"
+    tt=$(echo "$SEMVERY_YEASY_PR_BODY" | sed -e 'N;s/\n/\\n/g' -e 's/\\r\\n/\\n/g')
+    echo "SEMVERY_YEASY_PR_BODY='$tt'"
+
+    if [[ $formatted_body == *"$tt"* ]]; then
+        echo 'Already version updated'
+    else
+        jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}${formatted_body}\" }" | \
+        curl -sL  -X PATCH -d @- \
+            -H "Content-Type: application/vnd.github+json" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"
+    fi
 ;;
 
 tag)
