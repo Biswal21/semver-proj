@@ -61,6 +61,7 @@ changed)
     if [ "${GITVERSION_REPO_TYPE}" = 'SINGLE_APP' ]; then
         # if [ `git diff "${DIFF_SOURCE}" "${DIFF_DEST}" --name-only | grep -o '^src/' | sort | uniq` = 'src/' ]; then
         # ! Modify the grep to match the correct folder which one you should not track for version bump
+        echo "changed contiion=$(git diff "${DIFF_SOURCE}" "${DIFF_DEST}" --name-only | grep -E -v '^(.github/|.vscode/|.husky|.cicd/)' | sort | uniq)"
         if [ "$(git diff "${DIFF_SOURCE}" "${DIFF_DEST}" --name-only | grep -E -v '^(.github/|.vscode/|.husky|.cicd/)' | sort | uniq)" ]; then
         changed=true
         else
@@ -85,8 +86,9 @@ changed)
 calculate-version)
     CONFIG_FILE_VAR="GITVERSION_CONFIG_${GITVERSION_REPO_TYPE}"
     if [ "${GITVERSION_REPO_TYPE}" = 'SINGLE_APP' ]; then
-        service_versions_txt='## version bump\n'
+        service_versions_txt=''
         if [ "${SEMVERYEASY_CHANGED}" = 'true' ]; then
+        service_versions_txt='## Version update\n'
         docker run --rm -v "$(pwd):/repo" ${GITVERSION} /repo /config "${CONFIG_FILE}"
         gitversion_calc=$(docker run --rm -v "$(pwd):/repo" ${GITVERSION} /repo /config "${CONFIG_FILE}")
         GITVERSION_TAG_PROPERTY_NAME="GITVERSION_TAG_PROPERTY_PULL_REQUESTS"
@@ -94,15 +96,15 @@ calculate-version)
         service_version=$(echo "${gitversion_calc}" | jq -r "[${GITVERSION_TAG_PROPERTY}] | join(\"\")")
         service_versions_txt+="v${service_version}\n"
         else
-        service_versions_txt+='\nNo version bump required\n'
+        service_versions_txt+='No version update required\n'
         fi
     else
-        service_versions_txt='## impact surface\n'
+        service_versions_txt='## Impact surface\n'
         changed_services=( $SEMVERYEASY_CHANGED_SERVICES )
         if [ "${#changed_services[@]}" = "0" ]; then
         service_versions_txt+='No services changed\n'
         else
-        service_versions_txt="## impact surface\n"
+        service_versions_txt="## Impact surface\n"
         for svc in "${changed_services[@]}"; do
             echo "calculation for ${svc}"
             CONFIG_FILE=${!CONFIG_FILE_VAR//\$svc/$svc}
@@ -117,11 +119,13 @@ calculate-version)
     fi
     # fix multiline variables
     # from: https://github.com/actions/create-release/issues/64#issuecomment-638695206
+    # PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+    # echo "PR_NUMBER='$PR_NUMBER'"
+    # echo "GITHUB_REPOSITORY='$GITHUB_REPOSITORY'"
+    # echo "GITHUB_TOKEN='$GITHUB_TOKEN'"
+    
     PR_BODY=$service_versions_txt
-    echo "Before jq command ${PR_BODY}"
-    # PR_BODY=$(printf '%s' "$PR_BODY" | jq --raw-input --slurp '.')
-    echo "${PR_BODY}"
-    # echo "::set-output name=PR_BODY::$PR_BODY"
+    echo "PR_BODY=${PR_BODY}"
     echo "PR_BODY=${PR_BODY}" >> $GITHUB_OUTPUT
 ;;
 
@@ -129,10 +133,32 @@ update-pr)
     PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
     # from https://github.com/actions/checkout/issues/58#issuecomment-614041550
     echo "PR_NUMBER='$PR_NUMBER'"
-    echo "SEMVERY_YEASY_PR_BODY=${SEMVERY_YEASY_PR_BODY}"
-    jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\" }" | \
+
+    pr_response=$(curl -sL \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
+    current_pr_body=$(echo $pr_response | jq -r '.body' | sed 'N;s/\n/\\n/g')
+
+    echo "current_pr_body='$current_pr_body'"
+    echo "SEMVERY_YEASY_PR_BODY='$SEMVERY_YEASY_PR_BODY'"
+
+    if [[ $current_pr_body =~ $SEMVERY_YEASY_PR_BODY ]]; then
+        echo "SEMVERY_YEASY_PR_BODY exists in current_body"
+    else
+        echo "SEMVERY_YEASY_PR_BODY does not exist in current_body"
+    fi
+
+    if grep -Fq "$SEMVERY_YEASY_PR_BODY" <<< "$current_body"; then
+        echo "SEMVERY_YEASY_PR_BODY exists in current_body"
+    else
+        echo "SEMVERY_YEASY_PR_BODY does not exist in current_body"
+    fi
+
+    
+    jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\n${current_pr_body}\" }" | \
     curl -sL  -X PATCH -d @- \
-        -H "Content-Type: application/json" \
+        -H "Content-Type: application/vnd.github+json" \
         -H "Authorization: token ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"
 ;;
