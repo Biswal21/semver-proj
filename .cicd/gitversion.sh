@@ -149,7 +149,7 @@ update-pr)
     echo "SEMVERY_YEASY_PR_BODY='$tt'"
     if [[ $formatted_body =~ $tt ]]; then echo 'Match found'; else echo 'Match not found'; fi
     
-    jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}${current_pr_body}\" }" | \
+    jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}${formatted_body}\" }" | \
     curl -sL  -X PATCH -d @- \
         -H "Content-Type: application/vnd.github+json" \
         -H "Authorization: token ${GITHUB_TOKEN}" \
