@@ -125,12 +125,7 @@ calculate-version)
     # echo "GITHUB_TOKEN='$GITHUB_TOKEN'"
     
     PR_BODY=$service_versions_txt
-    git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-    git config --global user.name 'github-actions'
-    echo "$service_versions_txt" > version.txt
-    git add version.txt
-    git commit -m "Update version.txt"
-    git push
+
     
     # echo "PR_BODY=${PR_BODY}"
     echo "PR_BODY=${PR_BODY}" >> $GITHUB_OUTPUT
@@ -185,6 +180,11 @@ tag)
         else
             full_service_version="${service_version}"
         fi
+        echo "$full_service_version" > version.txt
+        git add version.txt
+        git commit -m "tag: ${full_service_version}"
+        git push
+        
 
         git tag -a "v${full_service_version}" -m "v${full_service_version}"
         git push origin "v${full_service_version}"
@@ -208,6 +208,11 @@ tag)
         else
             full_service_version="${service_version}"
         fi
+        echo "${svc_without_prefix}/v${full_service_version}" > version.txt
+        git add version.txt
+        git commit -m "tag: ${svc_without_prefix}/v${full_service_version}"
+        git push
+        
         git tag -a "${svc_without_prefix}/v${full_service_version}" -m "${svc_without_prefix}/v${full_service_version}"
         git push origin "${svc_without_prefix}/v${full_service_version}"
         echo "TAG_VALUE=${svc_without_prefix}/v${full_service_version}" >> $GITHUB_OUTPUT
