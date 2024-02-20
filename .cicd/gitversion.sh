@@ -96,13 +96,13 @@ calculate-version)
         service_version=$(echo "${gitversion_calc}" | jq -r "[${GITVERSION_TAG_PROPERTY}] | join(\"\")")
         service_versions_txt+="v${service_version}\n"
         else
-        service_versions_txt+='No version update required\n'
+        service_versions_txt+='### No version update required\n'
         fi
     else
         service_versions_txt='## Impact surface\n'
         changed_services=( $SEMVERYEASY_CHANGED_SERVICES )
         if [ "${#changed_services[@]}" = "0" ]; then
-        service_versions_txt+='No services changed\n'
+        service_versions_txt+='### No services changed\n'
         else
         service_versions_txt="## Impact surface\n"
         for svc in "${changed_services[@]}"; do
