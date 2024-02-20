@@ -146,7 +146,7 @@ update-pr)
     tt=$(echo $SEMVERY_YEASY_PR_BODY | sed -e 'N;s/\n/\\n/g' -e 's/\\r\\n/\\n/g')
     echo "SEMVERY_YEASY_PR_BODY='$tt'"
 
-    # echo "current_pr_body='$current_pr_body'"
+    echo "current_pr_body"
     
     jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\n${current_pr_body}\" }" | \
     curl -sL  -X PATCH -d @- \
