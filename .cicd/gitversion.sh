@@ -143,7 +143,7 @@ update-pr)
     # echo "current_pr_body='$current_pr_body'"
     formatted_body=$(echo $current_pr_body | sed -e 's/\\r\\n/\\n/g')
     echo "formatted_body='$formatted_body'"
-    tt=$(echo $SEMVERY_YEASY_PR_BODY | sed -e 's/\\r\\n/\\n/g')
+    tt=$(echo $SEMVERY_YEASY_PR_BODY | sed -e 'N;s/\n/\\n/g' -e 's/\\r\\n/\\n/g')
     echo "SEMVERY_YEASY_PR_BODY='$tt'"
 
     # echo "current_pr_body='$current_pr_body'"
