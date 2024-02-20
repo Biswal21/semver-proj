@@ -141,9 +141,9 @@ update-pr)
     echo "pr_response='$pr_response'"
     current_pr_body=$(echo $pr_response | jq -r '.body')
     # echo "current_pr_body='$current_pr_body'"
-    formatted_body=$(echo $current_pr_body | sed 'N;s/\n/\\n/g')
+    formatted_body=$(echo $current_pr_body | sed -e 's/\\r\\n/\\n/g' -e 'N;s/\n/\\n/g')
     echo "formatted_body='$formatted_body'"
-    tt=$(echo $SEMVERY_YEASY_PR_BODY | sed 'N;s/\n/\\n/g')
+    tt=$(echo $SEMVERY_YEASY_PR_BODY | sed -e 's/\\r\\n/\\n/g' -e 'N;s/\n/\\n/g')
     echo "SEMVERY_YEASY_PR_BODY='$tt'"
 
     # echo "current_pr_body='$current_pr_body'"
