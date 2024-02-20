@@ -81,7 +81,7 @@ changed)
         echo "changed_services=${changed_services}" >> $GITHUB_OUTPUT
         echo "changed_services='$(echo "$changed_services" | sed 'N;s/\n/, /g')'"
     fi
-;;
+;; 
 
 calculate-version)
     CONFIG_FILE_VAR="GITVERSION_CONFIG_${GITVERSION_REPO_TYPE}"
@@ -138,23 +138,11 @@ update-pr)
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
-    current_pr_body=$(echo $pr_response | jq -r '.body' | sed 'N;s/\n/\\n/g')
+    current_pr_body=$(echo $pr_response | jq -r '.body')
+    echo "current_pr_body=${current_pr_body}"
 
-    echo "current_pr_body='$current_pr_body'"
-    echo "SEMVERY_YEASY_PR_BODY='$SEMVERY_YEASY_PR_BODY'"
-
-    if [[ $current_pr_body =~ $SEMVERY_YEASY_PR_BODY ]]; then
-        echo "SEMVERY_YEASY_PR_BODY exists in current_body"
-    else
-        echo "SEMVERY_YEASY_PR_BODY does not exist in current_body"
-    fi
-
-    if grep -Fq "$SEMVERY_YEASY_PR_BODY" <<< "$current_body"; then
-        echo "SEMVERY_YEASY_PR_BODY exists in current_body"
-    else
-        echo "SEMVERY_YEASY_PR_BODY does not exist in current_body"
-    fi
-
+    # echo "current_pr_body='$current_pr_body'"
+    # echo "SEMVERY_YEASY_PR_BODY='$SEMVERY_YEASY_PR_BODY'"
     
     jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\n${current_pr_body}\" }" | \
     curl -sL  -X PATCH -d @- \
