@@ -125,7 +125,9 @@ calculate-version)
     # echo "GITHUB_TOKEN='$GITHUB_TOKEN'"
     
     PR_BODY=$service_versions_txt
-    echo "PR_BODY=${PR_BODY}"
+    
+    
+    # echo "PR_BODY=${PR_BODY}"
     echo "PR_BODY=${PR_BODY}" >> $GITHUB_OUTPUT
 ;;
 
@@ -178,6 +180,11 @@ tag)
         else
             full_service_version="${service_version}"
         fi
+        echo "$full_service_version" > version.txt
+        git add version.txt
+        git commit -m "Update version.txt"
+        git push
+        
         git tag -a "v${full_service_version}" -m "v${full_service_version}"
         git push origin "v${full_service_version}"
         fi
