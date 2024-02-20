@@ -139,10 +139,13 @@ update-pr)
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
     current_pr_body=$(echo $pr_response | jq -r '.body')
-    echo "current_pr_body='$current_pr_body'"
+    # echo "current_pr_body='$current_pr_body'"
+    formatted_body=$(echo $current_pr_body | sed 'N;s/\n/\\n/g')
+    echo "formatted_body='$formatted_body'"
+    tt=$(echo $SEMVERY_YEASY_PR_BODY | sed 'N;s/\n/\\n/g')
+    echo "SEMVERY_YEASY_PR_BODY='$tt'"
 
     # echo "current_pr_body='$current_pr_body'"
-    # echo "SEMVERY_YEASY_PR_BODY='$SEMVERY_YEASY_PR_BODY'"
     
     jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\n${current_pr_body}\" }" | \
     curl -sL  -X PATCH -d @- \
