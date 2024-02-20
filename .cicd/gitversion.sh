@@ -146,6 +146,7 @@ update-pr)
     tt=$(echo $SEMVERY_YEASY_PR_BODY | sed -e 'N;s/\n/\\n/g' -e 's/\\r\\n/\\n/g')
     echo "SEMVERY_YEASY_PR_BODY='$tt'"
     max_tt='(${tt})'
+    echo "max_tt='$max_tt'"
     if [[ $formatted_body =~ $max_tt ]]; then echo 'Match found'; else echo 'Match not found'; fi
     
     jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}${current_pr_body}\" }" | \
