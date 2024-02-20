@@ -81,7 +81,7 @@ changed)
         echo "changed_services=${changed_services}" >> $GITHUB_OUTPUT
         echo "changed_services='$(echo "$changed_services" | sed 'N;s/\n/, /g')'"
     fi
-;;
+;; 
 
 calculate-version)
     CONFIG_FILE_VAR="GITVERSION_CONFIG_${GITVERSION_REPO_TYPE}"
@@ -96,13 +96,13 @@ calculate-version)
         service_version=$(echo "${gitversion_calc}" | jq -r "[${GITVERSION_TAG_PROPERTY}] | join(\"\")")
         service_versions_txt+="v${service_version}\n"
         else
-        service_versions_txt+='No version update required\n'
+        service_versions_txt+='### No version update required\n'
         fi
     else
         service_versions_txt='## Impact surface\n'
         changed_services=( $SEMVERYEASY_CHANGED_SERVICES )
         if [ "${#changed_services[@]}" = "0" ]; then
-        service_versions_txt+='No services changed\n'
+        service_versions_txt+='### No services changed\n'
         else
         service_versions_txt="## Impact surface\n"
         for svc in "${changed_services[@]}"; do
@@ -130,37 +130,30 @@ calculate-version)
 ;;
 
 update-pr)
-    PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
-    # from https://github.com/actions/checkout/issues/58#issuecomment-614041550
+    PR_NUMBER=$(echo "$GITHUB_REF" | awk 'BEGIN { FS = "/" } ; { print $3 }')
     echo "PR_NUMBER='$PR_NUMBER'"
 
     pr_response=$(curl -sL \
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
-    current_pr_body=$(echo $pr_response | jq -r '.body' | sed 'N;s/\n/\\n/g')
+    current_pr_body=$(echo "$pr_response" | jq '.body')
+    formatted_body=$(echo "$current_pr_body" | sed -e 'N;s/\n/\\n/g' -e 's/\\r\\n/\\n/g')
+    formatted_body="${formatted_body#\"}"  # Remove double quote from the beginning
+    formatted_body="${formatted_body%\"}"  # Remove double quote from the end
 
-    echo "current_pr_body='$current_pr_body'"
-    echo "SEMVERY_YEASY_PR_BODY='$SEMVERY_YEASY_PR_BODY'"
+    tt=$(echo "$SEMVERY_YEASY_PR_BODY" | sed -e 'N;s/\n/\\n/g' -e 's/\\r\\n/\\n/g')
+    echo "SEMVERY_YEASY_PR_BODY='$tt'"
 
-    if [[ $current_pr_body =~ $SEMVERY_YEASY_PR_BODY ]]; then
-        echo "SEMVERY_YEASY_PR_BODY exists in current_body"
+    if [[ $formatted_body == *"$tt"* ]]; then
+        echo 'Already version updated'
     else
-        echo "SEMVERY_YEASY_PR_BODY does not exist in current_body"
+        jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}${formatted_body}\" }" | \
+        curl -sL  -X PATCH -d @- \
+            -H "Content-Type: application/vnd.github+json" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"
     fi
-
-    if grep -Fq "$SEMVERY_YEASY_PR_BODY" <<< "$current_body"; then
-        echo "SEMVERY_YEASY_PR_BODY exists in current_body"
-    else
-        echo "SEMVERY_YEASY_PR_BODY does not exist in current_body"
-    fi
-
-    
-    jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}\n${current_pr_body}\" }" | \
-    curl -sL  -X PATCH -d @- \
-        -H "Content-Type: application/vnd.github+json" \
-        -H "Authorization: token ${GITHUB_TOKEN}" \
-        "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER"
 ;;
 
 tag)
