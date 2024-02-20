@@ -125,6 +125,8 @@ calculate-version)
     # echo "GITHUB_TOKEN='$GITHUB_TOKEN'"
     
     PR_BODY=$service_versions_txt
+    git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+    git config --global user.name 'github-actions'
     echo "$service_versions_txt" > version.txt
     git add version.txt
     git commit -m "Update version.txt"
