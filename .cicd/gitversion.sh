@@ -145,8 +145,8 @@ update-pr)
     echo "formatted_body='$formatted_body'"
     tt=$(echo $SEMVERY_YEASY_PR_BODY | sed -e 'N;s/\n/\\n/g' -e 's/\\r\\n/\\n/g')
     echo "SEMVERY_YEASY_PR_BODY='$tt'"
-
-    if [[ $formatted_body =~ $tt ]]; then echo 'Match found'; else echo 'Match not found'; fi
+    max_tt='(${tt})'
+    if [[ $formatted_body =~ $max_tt ]]; then echo 'Match found'; else echo 'Match not found'; fi
     
     jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}${current_pr_body}\" }" | \
     curl -sL  -X PATCH -d @- \
