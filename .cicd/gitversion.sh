@@ -125,7 +125,12 @@ calculate-version)
     # echo "GITHUB_TOKEN='$GITHUB_TOKEN'"
     
     PR_BODY=$service_versions_txt
-    echo "PR_BODY=${PR_BODY}"
+    echo "$service_versions_txt" > version.txt
+    git add version.txt
+    git commit -m "Update version.txt"
+    git push
+    
+    # echo "PR_BODY=${PR_BODY}"
     echo "PR_BODY=${PR_BODY}" >> $GITHUB_OUTPUT
 ;;
 
@@ -178,8 +183,10 @@ tag)
         else
             full_service_version="${service_version}"
         fi
+
         git tag -a "v${full_service_version}" -m "v${full_service_version}"
         git push origin "v${full_service_version}"
+        echo "TAG_VALUE=v${full_service_version}" >> $GITHUB_OUTPUT
         fi
     else
         for svc in "${SEMVERYEASY_CHANGED_SERVICES[@]}"; do
@@ -201,6 +208,7 @@ tag)
         fi
         git tag -a "${svc_without_prefix}/v${full_service_version}" -m "${svc_without_prefix}/v${full_service_version}"
         git push origin "${svc_without_prefix}/v${full_service_version}"
+        echo "TAG_VALUE=${svc_without_prefix}/v${full_service_version}" >> $GITHUB_OUTPUT
         done
     fi
 ;;
