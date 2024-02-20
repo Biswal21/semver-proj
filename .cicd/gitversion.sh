@@ -139,7 +139,7 @@ update-pr)
         -H "Authorization: Bearer ${GITHUB_TOKEN}" \
         "https://api.github.com/repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER")
     echo "pr_response='$pr_response'"
-    current_pr_body=$(echo $pr_response | jq -r '.body')
+    current_pr_body=$(echo $pr_response | jq '.body')
     # echo "current_pr_body='$current_pr_body'"
     formatted_body=$(echo $current_pr_body | sed -e 'N;s/\n/\\n/g' -e 's/\\r\\n/\\n/g')
     echo "formatted_body='$formatted_body'"
