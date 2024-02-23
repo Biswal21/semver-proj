@@ -150,6 +150,8 @@ update-pr)
     if [[ $formatted_body == *"$tt"* ]]; then
         echo 'Already version updated'
     else
+        echo "Updating PR body"
+        echo "formatted_body=${formatted_body}"
         jq -nc "{\"body\": \"${SEMVERY_YEASY_PR_BODY}${formatted_body}\" }" | \
         curl -sL  -X PATCH -d @- \
             -H "Content-Type: application/vnd.github+json" \
